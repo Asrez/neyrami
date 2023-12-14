@@ -11,20 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('messages', function (Blueprint $table) {
-            $table->bigIncrements('id');
+        Schema::create('subscriptions', function (Blueprint $table) {
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('channel_id');
-            $table->string('title')->index();
-            $table->text('body');
-            $table->timestamps();
 
             $table->foreign('user_id')
-                ->references('id')->on('users')
+                ->references('id')
+                ->on('users')
                 ->onDelete('cascade');
+
             $table->foreign('channel_id')
-                ->references('id')->on('channels')
+                ->references('id')
+                ->on('channels')
                 ->onDelete('cascade');
+
+            $table->primary(['user_id', 'channel_id']);
         });
     }
 
@@ -33,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('messages');
+        Schema::dropIfExists('subscriptions');
     }
 };

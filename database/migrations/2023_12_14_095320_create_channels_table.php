@@ -12,7 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('channels', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('user_id');
+            $table->string('name')->index();
+            $table->string('identifier')->unique();
+            $table->string('image')->nullable();
+            $table->foreign('user_id')
+            ->references('id')
+            ->on('users')
+            ->onDelete('cascade');
             $table->timestamps();
         });
     }
