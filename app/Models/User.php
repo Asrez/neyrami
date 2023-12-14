@@ -33,6 +33,21 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    public function channels()
+    {
+        return $this->hasMany(Channel::class);
+    }
+
+    public function subscriptions()
+    {
+        return $this->belongsToMany(Channel::class, 'subscriptions');
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
+
     /**
      * The attributes that should be cast.
      *
