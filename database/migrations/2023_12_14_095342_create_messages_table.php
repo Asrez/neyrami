@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,21 +12,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('messages', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('channel_id');
-            $table->string('title')->index();
-            $table->text('body');
-            $table->timestamps();
+        DB::unprepared('CREATE TABLE messages (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            user_id BIGINT UNSIGNED NOT NULL,
+            channel_id BIGINT UNSIGNED NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            body TEXT NOT NULL,
+            created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id, user_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci PARTITION BY RANGE COLUMNS(user_id) (
+            PARTITION p0 VALUES LESS THAN (100000),
+            PARTITION p1 VALUES LESS THAN (200000),
+            PARTITION p2 VALUES LESS THAN (300000),
+            PARTITION p3 VALUES LESS THAN (400000),
+            PARTITION p4 VALUES LESS THAN (500000),
+            PARTITION p5 VALUES LESS THAN MAXVALUE
+        );');
 
-            $table->foreign('user_id')
-                ->references('id')->on('users')
-                ->onDelete('cascade');
-            $table->foreign('channel_id')
-                ->references('id')->on('channels')
-                ->onDelete('cascade');
-        });
     }
 
     /**
