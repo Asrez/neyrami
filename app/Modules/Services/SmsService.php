@@ -11,6 +11,6 @@ class SmsService implements NotificationService
 
     public static function send(User $user, Message $message)
     {
-        
+
     }
 }
