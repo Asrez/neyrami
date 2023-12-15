@@ -9,7 +9,7 @@ class Channel extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'identifier', 'image'];
+    protected $fillable = ['name', 'identifier', 'image','user_id'];
 
     public function user()
     {
