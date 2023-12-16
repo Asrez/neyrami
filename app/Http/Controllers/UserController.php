@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Channel\ChannelSubscriber;
 use App\Http\Requests\Channel\ChannelUnSubscriber;
+use App\Http\Requests\Users\UserUpdateRequest;
 use App\Modules\InterFaces\ChannelRepositoryInterFace;
 use App\Modules\InterFaces\UserRepositoryInterface;
 use App\Modules\Repository\ChannelRepository;
@@ -12,26 +13,32 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     protected $userRepository;
-    protected $channelRepository;
 
-    public function __construct(UserRepositoryInterface $userRepository ,ChannelRepositoryInterFace $channelRepository) {
+    public function __construct(UserRepositoryInterface $userRepository ) {
         $this->userRepository = $userRepository;
-        $this->channelRepository = $channelRepository;
-
     }
 
-    public function subscribeToChannel(ChannelSubscriber $subscriber)
+    public function all()
     {
-       $data = $this->channelRepository->model()->subscribers()->attach(auth('api')->user()->id);
-        return response()->json(['message' => 'Subscribed',$data], 200 );
+        return $this->userRepository->all();
     }
 
-    public function unsubscribeFromChannel(ChannelUnSubscriber $unSubscriber)
+    public function index(Request $request)
     {
-       $data = $this->channelRepository->model()->subscribers()->detach(auth('api')->user()->id);
-        return response()->json(['message' => 'Unsubscribed',$data], 200 );
+        return $this->userRepository->pagination($request);
     }
 
+    public function find($id)
+    {
+
+        return $this->userRepository->find($id);
+    }
+
+    public function update(UserUpdateRequest $request , $id)
+    {
+        $user = $this->userRepository->find($id);
+        return $user->update($request->validated());
+    }
 
 
 }

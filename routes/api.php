@@ -39,4 +39,11 @@ Route::group(['prefix' => 'v1',
         Route::get('/{channel}/messages', [\App\Http\Controllers\MessageController::class, 'getMessageByChannelId']);
 
     });
+    Route::prefix('users')->group(function () {
+        Route::get('/', [\App\Http\Controllers\UserController::class, 'index']);
+        Route::get('/{id}', [\App\Http\Controllers\UserController::class, 'find']);
+
+
+
+    });
 });
