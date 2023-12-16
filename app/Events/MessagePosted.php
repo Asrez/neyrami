@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\Message;
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -19,10 +20,12 @@ class MessagePosted
      * Create a new event instance.
      */
     public $message;
+    public $user;
 
-    public function __construct(Message $message)
+    public function __construct(Message $message,User $user)
     {
         $this->message = $message;
+        $this->user = $user;
     }
 
 

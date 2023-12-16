@@ -13,4 +13,7 @@ class TelegramService implements NotificationService
     {
         // TODO: Implement send() method.
     }
+    public function setMsgReceve($user , $message){
+
+    }
 }

@@ -23,15 +23,17 @@ class SendMessageToSubscribers implements ShouldQueue
 
     public function handle(MessagePosted $event)
     {
-        \Log::info(response()->json($event->message->channel->subscribers, 200));
-        $subscribers = $event->message->channel->subscribers;
+        \Log::info(response()->json($event->message, 200));
+        \Log::info(response()->json($event->user, 200));
+        $subscriber = $event->user;
 
-        foreach ($subscribers as $subscriber) {
-            $service = "App\\Modules\\Services\\" . Str::ucfirst($subscriber->enabled_notification_service) . "Service";
+        $service = "App\\Modules\\Services\\" . Str::ucfirst($subscriber->enabled_notification_service) . "Service";
 
-            if ($service) {
-                \Closure::fromCallable([$service, 'send'])($subscriber, $event->message);
-            }
+        if ($service) {
+            \Closure::fromCallable([$service, 'send'])($subscriber, $event->message);
+            \Closure::fromCallable([$service, 'setMsgReceve'])($subscriber, $event->message);
+
         }
+
     }
 }

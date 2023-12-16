@@ -6,6 +6,7 @@ use App\Events\MessagePosted;
 use App\Http\Requests\Channels\CreateUniqeChannelRequest;
 use App\Http\Requests\Messages\MseesageStoreRequest;
 use App\Models\Channel;
+use App\Models\ReceivedMsg;
 use App\Modules\InterFaces\ChannelRepositoryInterFace;
 use App\Modules\InterFaces\MessageRepositoryInterFace;
 use Illuminate\Http\Request;
@@ -78,8 +79,13 @@ class ChannelController extends Controller
         $channel->subscribers()->attach(auth('api')->user()->id);
         return response()->json(['message' => 'You have subscribed to this channel'], 200);
     }
+    public function unSubscribe(Request $request,Channel $channel)
+    {
+        $channel = $this->channelRepository->model()->where('id', $channel->id)->first();
 
-
+        $channel->subscribers()->detach(auth('api')->user()->id);
+        return response()->json(['message' => 'You have subscribed to this channel'], 200);
+    }
 
 
     public function storeMessage(MseesageStoreRequest $request, Channel $channel)
@@ -88,16 +94,42 @@ class ChannelController extends Controller
             return response()->json(['message' => 'شما صاحب این کانال نیستید'], 403);
         }
 
+        // بررسی که آیا پیامی با همین متن قبلاً در کانال ارسال شده است یا خیر
+        $existingMessage = $this->messageRepository->model()->where('channel_id', $channel->id)
+            ->where('body', $request->body)
+            ->first();
+
+        if ($existingMessage) {
+            // پیدا کردن کاربرانی که پیام قبلی را دریافت کرده‌اند
+            $usersWhoReceived = ReceivedMsg::where('message_id', $existingMessage->id)
+                ->pluck('user_id');
+
+            // پیدا کردن کاربرانی که پیام قبلی را دریافت نکرده‌اند
+            $usersWhoDidNotReceive = $channel->subscribers()
+                ->whereNotIn('id', $usersWhoReceived)
+                ->get();
+
+            // ارسال پیام جدید به کاربرانی که پیام قبلی را دریافت نکرده‌اند
+            foreach ($usersWhoDidNotReceive as $user) {
+                event(new MessagePosted($existingMessage , $user));
+            }
+
+            return response()->json(['message' => 'پیام با موفقیت ارسال شد.'], 201);
+        }
+
         $message = $this->messageRepository->create([
             'user_id' => auth('api')->user()->id,
             'channel_id' => $channel->id,
             'title' => $request->title,
             'body' => $request->body,
         ]);
-        event(new MessagePosted($message));
-//        broadcast(new MessagePosted($message, auth('api')->user()))->toOthers();
 
-        return response()->json(['message' => 'پیام با موفقیت ایجاد شد.'], 201);
+        // ارسال پیام جدید به تمام سابسکرایبرهای کانال
+        foreach ($channel->subscribers as $subscriber) {
+            event(new MessagePosted($message , $subscriber));
+        }
+
+        return response()->json(['message' => 'پیام با موفقیت ایجاد و ارسال شد.'], 201);
     }
 
 

@@ -8,4 +8,5 @@ use App\Models\User;
 interface NotificationService
 {
     public static function send(User $user, Message $message);
+
 }

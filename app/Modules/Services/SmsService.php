@@ -13,4 +13,7 @@ class SmsService implements NotificationService
     {
 
     }
+    public function setMsgReceve($user , $message){
+
+    }
 }
