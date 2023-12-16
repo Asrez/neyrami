@@ -17,7 +17,8 @@ class ChannelController extends Controller
     protected $channelRepository;
     protected $messageRepository;
 
-    public function __construct(ChannelRepositoryInterFace $channelRepository,MessageRepositoryInterFace $messageRepository){
+    public function __construct(ChannelRepositoryInterFace $channelRepository, MessageRepositoryInterFace $messageRepository)
+    {
         $this->channelRepository = $channelRepository;
         $this->messageRepository = $messageRepository;
     }
@@ -72,14 +73,15 @@ class ChannelController extends Controller
 
     //subscribe to a channel
 
-    public function subscribe(Request $request,Channel $channel)
+    public function subscribe(Request $request, Channel $channel)
     {
         $channel = $this->channelRepository->model()->where('id', $channel->id)->first();
 
         $channel->subscribers()->attach(auth('api')->user()->id);
         return response()->json(['message' => 'You have subscribed to this channel'], 200);
     }
-    public function unSubscribe(Request $request,Channel $channel)
+
+    public function unSubscribe(Request $request, Channel $channel)
     {
         $channel = $this->channelRepository->model()->where('id', $channel->id)->first();
 
@@ -100,7 +102,6 @@ class ChannelController extends Controller
             ->first();
 
         if ($existingMessage) {
-            // پیدا کردن کاربرانی که پیام قبلی را دریافت کرده‌اند
             $usersWhoReceived = ReceivedMsg::where('message_id', $existingMessage->id)
                 ->pluck('user_id');
 
@@ -111,24 +112,25 @@ class ChannelController extends Controller
 
             // ارسال پیام جدید به کاربرانی که پیام قبلی را دریافت نکرده‌اند
             foreach ($usersWhoDidNotReceive as $user) {
-                event(new MessagePosted($existingMessage , $user));
+                event(new MessagePosted($existingMessage, $user));
             }
 
             return response()->json(['message' => 'پیام با موفقیت ارسال شد.'], 201);
+        } else {
+
+
+            $message = $this->messageRepository->create([
+                'user_id' => auth('api')->user()->id,
+                'channel_id' => $channel->id,
+                'title' => $request->title,
+                'body' => $request->body,
+            ]);
+
+            // ارسال پیام جدید به تمام سابسکرایبرهای کانال
+            foreach ($channel->subscribers as $subscriber) {
+                event(new MessagePosted($message, $subscriber));
+            }
         }
-
-        $message = $this->messageRepository->create([
-            'user_id' => auth('api')->user()->id,
-            'channel_id' => $channel->id,
-            'title' => $request->title,
-            'body' => $request->body,
-        ]);
-
-        // ارسال پیام جدید به تمام سابسکرایبرهای کانال
-        foreach ($channel->subscribers as $subscriber) {
-            event(new MessagePosted($message , $subscriber));
-        }
-
         return response()->json(['message' => 'پیام با موفقیت ایجاد و ارسال شد.'], 201);
     }
 

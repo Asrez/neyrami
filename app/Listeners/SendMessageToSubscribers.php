@@ -15,7 +15,7 @@ class SendMessageToSubscribers implements ShouldQueue
      * Create the event listener.
      */
     protected $notificationServices;
-
+//    public $delay = 60;
     public function __construct()
     {
 
@@ -23,8 +23,8 @@ class SendMessageToSubscribers implements ShouldQueue
 
     public function handle(MessagePosted $event)
     {
-        \Log::info(response()->json($event->message, 200));
-        \Log::info(response()->json($event->user, 200));
+        sleep(2);
+
         $subscriber = $event->user;
 
         $service = "App\\Modules\\Services\\" . Str::ucfirst($subscriber->enabled_notification_service) . "Service";

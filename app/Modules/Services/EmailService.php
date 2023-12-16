@@ -24,8 +24,8 @@ class EmailService implements NotificationService
 
     }
 
-    public static function setMsgReceve($user , $message){
-        self::$msgRecevedRepoInterFace::create([
+    public static function setMsgReceve(User $user, Message $message){
+        ReceivedMsg::create([
             'user_id'=> $user->id,
             'message_id'=> $message->id,
         ]);
