@@ -9,18 +9,17 @@ use Illuminate\Support\LazyCollection;
 
 class MessageRecivedRepository implements MsgRecevedRepoInterFace
 {
-    protected $model;
+    protected static $model;
 
-    public function __construct(ReceivedMsg $msg)
-    {
+    public function __construct(ReceivedMsg $msg){
         $this->model = $msg;
     }
 
-    public function model()
+    public static function model()
     {
-        return $this->model;
+        return self::$model;
     }
-    public function all()
+    public static function all()
     {
         return LazyCollection::make(function () {
             foreach ($this->model->cursor() as $msg) {
@@ -29,30 +28,30 @@ class MessageRecivedRepository implements MsgRecevedRepoInterFace
         })->chunk(200);
     }
 
-    public function find($id)
+    public static function find($id)
     {
-        return $this->model->find($id);
+        return self::$model->find($id);
     }
 
-    public function pagination($request)
+    public static function pagination($request)
     {
-        return $this->model->paginate($request->per_page ?? 10);
+        return self::$model->paginate($request->per_page ?? 10);
     }
 
-    public function create($request)
+    public static function create($request)
     {
-        return $this->model->create($request);
+        return self::$model->create($request);
     }
 
-    public function update($request, $id)
+    public static function update($request, $id)
     {
-        $msg = $this->model->find($id);
+        $msg = self::$model->find($id);
         return $msg->update($request);
     }
 
-    public function delete($id)
+    public static function delete($id)
     {
-        $msg = $this->model->find($id);
+        $msg = self::$model->find($id);
         return $msg->delete();
     }
 }
